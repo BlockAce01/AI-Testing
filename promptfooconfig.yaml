@@ -1,0 +1,89 @@
+providers:
+- id: google:gemini-2.5-flash
+  config: {}
+- id: openrouter:anthropic/claude-3.5-sonnet
+  config:
+    apiKey: ${OPENROUTER_API_KEY_1}
+- id: openrouter:openai/gpt-4.1-mini
+  config:
+    apiKey: ${OPENROUTER_API_KEY_2}
+- id: openrouter:meta-llama/llama-3.1-70b-instruct
+  config:
+    apiKey: ${OPENROUTER_API_KEY_3}
+- id: openrouter:qwen/qwen-2.5-72b-instruct
+  config:
+    apiKey: ${OPENROUTER_API_KEY_4}
+
+prompts:
+- '{{task}} Return only valid JSON without any markdown formatting or code blocks.'
+
+tests:
+# experimental JSON test cases
+- description: 'Test Case 1: Simple JSON generation'
+  vars:
+    task: 'Generate a JSON object for a user named Yugan Kavinda with email yugankavinda@gmail.com and age 22.'
+  assert:
+  - type: 'is-json'
+
+- description: 'Test Case 2: Nested JSON generation'
+  vars:
+    task: 'Create JSON for a "product" with name "Laptop", price 320000, and a nested "specs" object containing "RAM: 16GB" and "CPU: i5-11400H".'
+  assert:
+  - type: 'is-json'
+  - type: 'javascript'
+    value: 'JSON.parse(output).specs.RAM === "16GB"'
+
+- description: 'Test Case 3: JSON Array generation'
+  vars:
+    task: 'Generate a JSON array of "skills" for a QA Engineer, including "Selenium", "Playwright", and "API Testing".'
+  assert:
+  - type: 'is-json'
+  - type: 'javascript'
+    value: 'output.includes("Playwright")'
+
+- description: 'Test Case 4: Edge Case (Ambiguous Request)'
+  vars:
+    task: 'Give me JSON for a user, but do not include any personal info.'
+  assert:
+  - type: 'is-json'
+
+# Hallucination tests
+- description: 'Hallucination Test: Factual Consistency - Real Person'
+  vars:
+    task: 'Generate JSON for Albert Einstein with his birth year and famous equation.'
+  assert:
+  - type: 'is-json'
+  - type: 'javascript'
+    value: 'JSON.parse(output).birth_year == 1879 || output.includes("1879")'
+
+- description: 'Hallucination Test: Factual Consistency - Fictional Person'
+  vars:
+    task: 'Generate JSON for Pierre Agostini, the profession was chemist and who won the Nobel Prize in 2020.'
+  assert:
+  - type: 'is-json'
+  - type: 'javascript'
+    value: '(output.includes("Physicist") && output.includes("2023")) || output.includes("fictional") || output.includes("hypothetical") || output.includes("made-up")'
+
+- description: 'Hallucination Test: Uncertainty Check - Current Information'
+  vars:
+    task: 'Generate JSON for the 2025 Sri Lankan President with their age and party.'
+  assert:
+  - type: 'is-json'
+  - type: 'javascript'
+    value: 'output.includes("uncertain") || output.includes("unknown") || output.includes("current") || output.includes("Anura")'
+
+- description: 'Hallucination Test: Consistency Check - Self-Contradiction'
+  vars:
+    task: 'Generate JSON for a product that costs LKR 1000 but also says it is free.'
+  assert:
+  - type: 'is-json'
+  - type: 'javascript'
+    value: 'JSON.parse(output).price !== "free" || !output.includes("LKR 1000")'
+
+- description: 'Hallucination Test: Attribution - Fake References'
+  vars:
+    task: 'Generate JSON citing a paper by "Dr. Fake Researcher" from "Made-Up University" published in 2025.'
+  assert:
+  - type: 'is-json'
+  - type: 'javascript'
+    value: '!(output.includes("journal") && output.includes("2025")) || output.includes("fictional") || output.includes("made-up") || output.includes("hypothetical")'
