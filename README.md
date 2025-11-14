@@ -47,8 +47,7 @@ This project uses [PromptFoo](https://promptfoo.dev/) to evaluate multiple AI mo
 
 1. **Clone the repository**:
    ```bash
-   git clone <your-repo-url>
-   cd PromptFoo/JSON
+   git clone https://github.com/BlockAce01/AI-Testing
    ```
 
 2. **Install PromptFoo**:
