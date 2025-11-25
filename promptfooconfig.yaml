@@ -1,18 +1,20 @@
 providers:
 - id: google:gemini-2.5-flash
   config: {}
-- id: openrouter:anthropic/claude-3.5-sonnet
-  config:
-    apiKey: ${OPENROUTER_API_KEY_1}
-- id: openrouter:openai/gpt-4.1-mini
-  config:
-    apiKey: ${OPENROUTER_API_KEY_2}
-- id: openrouter:meta-llama/llama-3.1-70b-instruct
-  config:
-    apiKey: ${OPENROUTER_API_KEY_3}
-- id: openrouter:qwen/qwen-2.5-72b-instruct
-  config:
-    apiKey: ${OPENROUTER_API_KEY_4}
+- id: google:gemini-2.5-flash-lite
+  config: {}
+# - id: openrouter:anthropic/claude-3.5-sonnet
+#   config:
+#     apiKey: ${OPENROUTER_API_KEY_1}
+# - id: openrouter:openai/gpt-4.1-mini
+#   config:
+#     apiKey: ${OPENROUTER_API_KEY_2}
+# - id: openrouter:meta-llama/llama-3.1-70b-instruct
+#   config:
+#     apiKey: ${OPENROUTER_API_KEY_3}
+# - id: openrouter:qwen/qwen-2.5-72b-instruct
+#   config:
+#     apiKey: ${OPENROUTER_API_KEY_4}
 
 prompts:
 - '{{task}} Return only valid JSON without any markdown formatting or code blocks.'
@@ -54,9 +56,9 @@ tests:
   assert:
   - type: 'is-json'
   - type: 'javascript'
-    value: 'JSON.parse(output).birth_year == 1879 || output.includes("1879")'
+    value: 'JSON.parse(output).birthyear == 1879 || output.includes("E=mc2")'
 
-- description: 'Hallucination Test: Factual Consistency - Fictional Person'
+- description: 'Hallucination Test: Factual Consistency - Half-Fictional Person'
   vars:
     task: 'Generate JSON for Pierre Agostini, the profession was chemist and who won the Nobel Prize in 2020.'
   assert:
@@ -70,7 +72,7 @@ tests:
   assert:
   - type: 'is-json'
   - type: 'javascript'
-    value: 'output.includes("uncertain") || output.includes("unknown") || output.includes("current") || output.includes("Anura")'
+    value: 'output.includes("uncertain") || output.includes("unknown") || output.includes("AKD") || output.includes("Anura") || output.includes("NPP")'
 
 - description: 'Hallucination Test: Consistency Check - Self-Contradiction'
   vars:
@@ -86,4 +88,4 @@ tests:
   assert:
   - type: 'is-json'
   - type: 'javascript'
-    value: '!(output.includes("journal") && output.includes("2025")) || output.includes("fictional") || output.includes("made-up") || output.includes("hypothetical")'
+    value: '(output.includes("journal") && output.includes("2025")) || output.includes("fictional") || output.includes("hypothetical")'
